@@ -26,38 +26,46 @@ void Pipe::SpawnPipe( cocos2d::Layer *layer )
 	Sprite* m;
 	PhysicsBody*mb;
 	MoveBy *mAction;
-	int type= rand()%4; // 0 云 1 山 2 鸟
+	int type= rand()%3; // 0 云 1 山 2 鸟
 	double mPos = 0;
 	if(type== 0) {
 		m = Sprite::create("cloud.png");
 		mb = PhysicsBody::createBox( m->getContentSize());
-		m->setPosition(visibleSize.width, visibleSize.height-50-rand() % 120);
+		m->setPosition(visibleSize.width + m->getContentSize().width, visibleSize.height-50-rand() % 120);
+		double rand_size = (rand() % 10 + 3)/3;
+		m->setScale(rand_size);
 		//mPos = rand() % ((int)visibleSize.height - 100) + 80;
-		mAction = MoveBy::create( CLOUD_MOVEMENT_SPEED * visibleSize.width, Point( -visibleSize.width * 1.5, 0 ) );
+		double rand_speed = 2 / (rand() % 2 + 2);
+		mAction = MoveBy::create(rand_speed* CLOUD_MOVEMENT_SPEED * visibleSize.width, Point( -visibleSize.width * 1.5, 0 ) );
 	} else if(type== 1) {
 		m = Sprite::create("mount.png");
-		m->setScale(5.0f);
+		double rand_size = (rand() % 27 + 15) / 3;
+		m->setScale(rand_size);
 		mb = PhysicsBody::createBox( m->getContentSize());
-		m->setPosition(visibleSize.width, 100);
+		m->setPosition(visibleSize.width+ m->getContentSize().width, 100);
 		//mPos = 20;
 		mAction = MoveBy::create( MOUNT_MOVEMENT_SPEED * visibleSize.width, Point( -visibleSize.width * 1.5, 0 ) );
 	} else if(type== 2) {
 		m = Sprite::create("mbird.png");
 		mb = PhysicsBody::createBox( m->getContentSize());
-		m->setPosition(visibleSize.width, visibleSize.height -80- rand() % 150);
+		m->setPosition(visibleSize.width+m->getContentSize().width, visibleSize.height -150 - rand() % 150);
 		//mPos = rand() % ((int)visibleSize.height - 100) + 50;
-		mAction = MoveBy::create( MBIRD_MOVEMENT_SPEED * visibleSize.width, Point( -visibleSize.width * 1.5, 0 ) );
+		int rand_size = rand() % 3 + 1;
+		m->setScale(rand_size);
+
+		double rand_speed = 2 / (rand() % 3 + 2);
+		mAction = MoveBy::create(rand_speed* MBIRD_MOVEMENT_SPEED * visibleSize.width, Point( -visibleSize.width * 1.5, 0 ) );
 	} 
 	
 	
-	if(type<3) {
+	///if(type<3) {
 	    
     	mb->setDynamic( false );
     	mb->setCollisionBitmask( OBSTACLE_COLLISION_BITMASK );
         mb->setContactTestBitmask( true );
         layer->addChild( m );
         m->runAction( mAction );
-	}
+	//}
 	
 	//monsters.push_back(m);
 	//addChild(monsters);
