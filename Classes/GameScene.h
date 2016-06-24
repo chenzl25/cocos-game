@@ -2,7 +2,7 @@
 #define __GAME_SCENE_H__
 
 #include "cocos2d.h"
-#include "Pipe.h"
+#include "EnemyGenerator.h"
 #include "Player.h"
 
 class GameScene : public cocos2d::Layer
@@ -20,7 +20,7 @@ public:
 private:
     void SetPhysicsWorld( cocos2d::PhysicsWorld *world ) { sceneWorld = world; };
     
-    void SpawnPipe( float dt );
+    void newEnemy( float dt );
     
     bool onContactBegin( cocos2d::PhysicsContact &contact );
     
@@ -31,14 +31,14 @@ private:
     
     cocos2d::PhysicsWorld *sceneWorld;
     
-    Pipe pipe;
-    
 	Player *player;
     
     unsigned int score;
     
     cocos2d::Label *scoreLabel;
     
+	Size visibleSize;
+	Vec2 origin;
 };
 
 #endif // __GAME_SCENE_H__
