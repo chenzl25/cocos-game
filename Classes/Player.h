@@ -1,5 +1,5 @@
-#ifndef __BIRD_H__
-#define __BIRD_H__
+#ifndef __PLAYER_H__
+#define __PLAYER_H__
 
 #include "cocos2d.h"
 
@@ -23,4 +23,4 @@ private:
     
 };
 
-#endif // __BIRD_H__
+#endif // __PLAYER_H__

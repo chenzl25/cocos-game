@@ -32,8 +32,8 @@ bool GameScene::init()
         return false;
     }
     
-    Size visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    visibleSize = Director::getInstance()->getVisibleSize();
+    origin = Director::getInstance()->getVisibleOrigin();
 
     auto backgroundSprite = Sprite::create( "Background.png" );
     backgroundSprite->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y ) );
@@ -51,7 +51,7 @@ bool GameScene::init()
     
     this->addChild( edgeNode );
     
-    this->schedule( schedule_selector( GameScene::SpawnPipe ), PIPE_SPAWN_FREQUENCY * visibleSize.width );
+    this->schedule( schedule_selector( GameScene::newEnemy), PIPE_SPAWN_FREQUENCY * visibleSize.width );
     
     player = Player::create();
 	addChild(player);
@@ -80,29 +80,20 @@ bool GameScene::init()
     return true;
 }
 
-void GameScene::SpawnPipe( float dt )
+void GameScene::newEnemy( float dt )
 {
-    pipe.SpawnPipe( this );
+	this->addChild(EnemyGenerator::getInstance()->GenerateEnemy());
 }
 
 bool GameScene::onContactBegin( cocos2d::PhysicsContact &contact )
 {
-    PhysicsBody *a = contact.getShapeA( )->getBody();
-    PhysicsBody *b = contact.getShapeB( )->getBody();
+	Node * a = contact.getShapeA()->getBody()->getNode();
+    Node * b = contact.getShapeB()->getBody()->getNode();
     
-    if ( ( BIRD_COLLISION_BITMASK == a->getCollisionBitmask( ) && OBSTACLE_COLLISION_BITMASK == b->getCollisionBitmask() ) || ( BIRD_COLLISION_BITMASK == b->getCollisionBitmask( ) && OBSTACLE_COLLISION_BITMASK == a->getCollisionBitmask() ) )
+    if (a->getTag() == ENEMY_TAG && b->getTag() == PLAYER_TAG || b->getTag() == ENEMY_TAG && a->getTag() == PLAYER_TAG)
     {        
         auto scene = GameOverScene::createScene( score );
-        
         Director::getInstance( )->replaceScene( TransitionFade::create( TRANSITION_TIME, scene ) );
-    }
-    else if ( ( BIRD_COLLISION_BITMASK == a->getCollisionBitmask( ) && POINT_COLLISION_BITMASK == b->getCollisionBitmask() ) || ( BIRD_COLLISION_BITMASK == b->getCollisionBitmask( ) && POINT_COLLISION_BITMASK == a->getCollisionBitmask() ) )
-    {
-        score++;
-        
-        __String *tempScore = __String::createWithFormat( "%i", score );
-        
-        scoreLabel->setString( tempScore->getCString( ) );
     }
     
     return true;
@@ -125,14 +116,11 @@ void GameScene::StopFlying( float dt )
 void GameScene::update( float dt )
 {
 	player->Fall( );
+	EnemyGenerator::getInstance()->removeEnemys();
+
+	if (player->getPosition().y < 0 || player->getPosition().y > visibleSize.height) {
+		auto scene = GameOverScene::createScene(score);
+		Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
+	}
+
 }
-
-
-
-
-
-
-
-
-
-
