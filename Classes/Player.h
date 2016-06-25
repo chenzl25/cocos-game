@@ -12,14 +12,15 @@ public:
 	virtual bool init();
 
     void Fall( );
-    void Fly( ) { isFalling = false; };
-    void StopFlying( ) { isFalling = true; }
+    void Fly( );
     
 private:
     cocos2d::Size visibleSize;
     cocos2d::Vec2 origin;
     
     bool isFalling;
+	float speed;
+	float accelerate;
     
 };
 

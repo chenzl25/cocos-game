@@ -26,7 +26,6 @@ private:
     bool onTouchBegan( cocos2d::Touch *touch, cocos2d::Event *event );
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event);
     
-    void StopFlying( float dt );
     void update( float dt );
     
     cocos2d::PhysicsWorld *sceneWorld;

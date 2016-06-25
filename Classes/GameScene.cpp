@@ -106,21 +106,14 @@ bool GameScene::onContactBegin( cocos2d::PhysicsContact &contact )
 
 bool GameScene::onTouchBegan( cocos2d::Touch *touch, cocos2d::Event *event )
 {
-	player->Fly( );
-    this->scheduleOnce( schedule_selector( GameScene::StopFlying ), BIRD_FLY_DURATION );   
+	player->Fly();
     return true;
 }
 
 void GameScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event) {
 	if (keyCode == EventKeyboard::KeyCode::KEY_UP_ARROW) {
 		player->Fly();
-		this->scheduleOnce(schedule_selector(GameScene::StopFlying), BIRD_FLY_DURATION);
 	}
-}
-
-void GameScene::StopFlying( float dt )
-{
-	player->StopFlying( );
 }
 
 void GameScene::update( float dt )
