@@ -8,12 +8,12 @@ Scene* GameScene::createScene()
 {
     // 'scene' is an autorelease object
     auto scene = Scene::createWithPhysics( );
-    //scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL );
-    scene->getPhysicsWorld( )->setGravity( Vect( 0, 0 ) );
+    scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL );
+	scene->getPhysicsWorld()->setGravity(Vec2(0, 0));
     
     // 'layer' is an autorelease object
     auto layer = GameScene::create();
-    layer->SetPhysicsWorld( scene->getPhysicsWorld( ) );
+    layer->SetPhysicsWorld(scene->getPhysicsWorld());
 
     // add layer as a child to scene
     scene->addChild(layer);
@@ -64,14 +64,19 @@ bool GameScene::init()
     touchListener->setSwallowTouches( true );
     touchListener->onTouchBegan = CC_CALLBACK_2( GameScene::onTouchBegan, this );
     Director::getInstance( )->getEventDispatcher( )->addEventListenerWithSceneGraphPriority( touchListener, this );
+
+	auto keyboardListener = EventListenerKeyboard::create();
+	keyboardListener->onKeyPressed = CC_CALLBACK_2(GameScene::onKeyPressed, this);
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyboardListener, this);
     
     score = 0;
+	scoreLock = 10;
     
     __String *tempScore = __String::createWithFormat( "%i", score );
     
     scoreLabel = Label::createWithTTF( tempScore->getCString( ), "fonts/Marker Felt.ttf", visibleSize.height * SCORE_FONT_SIZE );
     scoreLabel->setColor( Color3B::WHITE );
-    scoreLabel->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height * 0.75 + origin.y ) );
+    scoreLabel->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height * 0.9 + origin.y ) );
     
     this->addChild( scoreLabel, 10000 );
     
@@ -101,20 +106,27 @@ bool GameScene::onContactBegin( cocos2d::PhysicsContact &contact )
 
 bool GameScene::onTouchBegan( cocos2d::Touch *touch, cocos2d::Event *event )
 {
-	player->Fly( );
-    
-    this->scheduleOnce( schedule_selector( GameScene::StopFlying ), BIRD_FLY_DURATION );
-    
+	player->Fly();
     return true;
 }
 
-void GameScene::StopFlying( float dt )
-{
-	player->StopFlying( );
+void GameScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event) {
+	if (keyCode == EventKeyboard::KeyCode::KEY_UP_ARROW) {
+		player->Fly();
+	}
 }
 
 void GameScene::update( float dt )
 {
+	if (scoreLock <= 0) {
+		scoreLock = 10;
+		score += 1;
+		scoreLabel->setString(String::createWithFormat("%i", score)->_string);
+	}
+	else {
+		scoreLock -= dt*100;
+	}
+
 	player->Fall( );
 	EnemyGenerator::getInstance()->removeEnemys();
 

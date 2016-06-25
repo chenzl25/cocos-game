@@ -155,13 +155,13 @@ bool AppDelegate::applicationDidFinishLaunching() {
     
     if ( true == IS_LANDSCAPE )
     {
-        glview->setFrameSize( 1024, 768 );
-		glview->setDesignResolutionSize( 1024, 768, ResolutionPolicy::EXACT_FIT );
+        glview->setFrameSize(1024, 512);
+		glview->setDesignResolutionSize(1024, 512, ResolutionPolicy::EXACT_FIT);
     }
     else
     {
-        glview->setFrameSize( 768, 1024 );
-        glview->setDesignResolutionSize( 768, 1024, ResolutionPolicy::EXACT_FIT );
+        glview->setFrameSize(512, 1024);
+        glview->setDesignResolutionSize(512, 1024, ResolutionPolicy::EXACT_FIT);
     }
 
 #endif
