@@ -24,4 +24,7 @@
 
 #define SCORE_FONT_SIZE 0.1
 
+#define ENEMY_TAG 99
+#define PLAYER_TAG 100
+
 #endif // __DEFINITIONS_H__
