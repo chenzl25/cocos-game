@@ -34,9 +34,9 @@ bool Player::init() {
 	return true;
 }
 
-void Player::Fall( )
+void Player::Fall()
 {
-    if ( true == isFalling )
+    if (true == isFalling)
     {
 		setPositionX( visibleSize.width / 2 + origin.x );
 		setPositionY(getPositionY() - ( BIRD_FALLING_SPEED * visibleSize.height ) );
@@ -47,7 +47,3 @@ void Player::Fall( )
 		setPositionY(getPositionY() + ( BIRD_FALLING_SPEED * visibleSize.height ) );
     }
 }
-
-
-
-

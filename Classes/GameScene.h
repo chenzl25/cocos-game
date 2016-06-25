@@ -23,8 +23,8 @@ private:
     void newEnemy( float dt );
     
     bool onContactBegin( cocos2d::PhysicsContact &contact );
-    
     bool onTouchBegan( cocos2d::Touch *touch, cocos2d::Event *event );
+	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event);
     
     void StopFlying( float dt );
     void update( float dt );
@@ -34,6 +34,7 @@ private:
 	Player *player;
     
     unsigned int score;
+	float scoreLock;
     
     cocos2d::Label *scoreLabel;
     
