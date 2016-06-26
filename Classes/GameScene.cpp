@@ -181,7 +181,7 @@ bool GameScene::onTouchBegan( cocos2d::Touch *touch, cocos2d::Event *event )
 void GameScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event) {
 	if (keyCode == EventKeyboard::KeyCode::KEY_UP_ARROW
 		|| keyCode == EventKeyboard::KeyCode::KEY_ENTER
-		|| keyCode == EventKeyboard::KeyCode::KEY_NONE) {
+		|| keyCode == EventKeyboard::KeyCode::KEY_SPACE) {
 		SimpleAudioEngine::getInstance()->playEffect("music/Wing.mp3");
 		player->Fly();
 	}

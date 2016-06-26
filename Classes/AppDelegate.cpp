@@ -22,7 +22,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) 
 	glview = GLViewImpl::create("Flappy Bird Clone. By Sonar Systems");
 #else
-	glview = GLView::create("My Game");
+	glview = GLViewImpl::create("My Game");
 #endif
         director->setOpenGLView(glview);
     }

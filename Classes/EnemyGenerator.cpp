@@ -61,7 +61,7 @@ Sprite * EnemyGenerator::GenerateEnemy()
 		m = Sprite::create("mountain.png");
 		m->setPosition(visibleSize.width + m->getContentSize().width, m->getContentSize().height*(1/rand_size)/2-20);
 		m->setScale(1/rand_size);
-		mAction = MoveBy::create( MOUNT_MOVEMENT_SPEED * visibleSize.width, Point(-visibleSize.width*2, 0));
+		mAction = MoveBy::create( MOUNT_MOVEMENT_SPEED * visibleSize.width, Point(-visibleSize.width*2 - m->getContentSize().width, 0));
 
 		Vec2 shape0[3];
 		shape0[0].setPoint(-550, -300);
