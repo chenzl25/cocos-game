@@ -6,7 +6,7 @@ Scene* GameScene::createScene()
 {
     // 'scene' is an autorelease object
     auto scene = Scene::createWithPhysics( );
-    scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL );
+    //scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL );
 	scene->getPhysicsWorld()->setGravity(Vec2(0, 0));
     
     // 'layer' is an autorelease object
@@ -37,9 +37,19 @@ bool GameScene::init()
 	preloadMusic();
 	playBgm();
 
-    auto backgroundSprite = Sprite::create( "Background.png" );
-    backgroundSprite->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y ) );
-    
+    auto backgroundSprite = Sprite::create( "bg.jpg" );
+	backgroundSprite->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+	CCSize size = CCDirector::sharedDirector()->getWinSize();
+	backgroundSprite->setPosition(ccp(size.width / 2, size.height / 2));
+	float winw = size.width; //获取屏幕宽度
+	float winh = size.height;//获取屏幕高度
+
+	float spx = backgroundSprite->getTextureRect().getMaxX();
+	float spy = backgroundSprite->getTextureRect().getMaxY();
+
+	backgroundSprite->setScaleX(winw / spx); //设置精灵宽度缩放比例
+	backgroundSprite->setScaleY(winh / spy);
+
     this->addChild( backgroundSprite );
     
     auto edgeBody = PhysicsBody::createEdgeBox( visibleSize, PHYSICSBODY_MATERIAL_DEFAULT, 3 );

@@ -34,8 +34,19 @@ bool SplashScene::init()
     
     this->scheduleOnce( schedule_selector( SplashScene::GoToMainMenuScene ), DISPLAY_TIME_SPLASH_SCENE );
 
-    auto backgroundSprite = Sprite::create( "SplashScreen.png" );
-    backgroundSprite->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y) );
+    auto backgroundSprite = Sprite::create( "splash.jpg" );
+	CCSize size = CCDirector::sharedDirector()->getWinSize();
+	backgroundSprite->setPosition(ccp(size.width / 2, size.height / 2));
+	float winw = size.width; //获取屏幕宽度
+	float winh = size.height;//获取屏幕高度
+
+	float spx = backgroundSprite->getTextureRect().getMaxX();
+	float spy = backgroundSprite->getTextureRect().getMaxY();
+
+	backgroundSprite->setScaleX(winw / spx); //设置精灵宽度缩放比例
+	backgroundSprite->setScaleY(winh / spy);
+
+    //backgroundSprite->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y) );
     
     this->addChild( backgroundSprite );
     
