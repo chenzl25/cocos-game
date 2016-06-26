@@ -13,7 +13,7 @@ public:
 
 	cocos2d::Sprite * GenerateEnemy();
 	void removeEnemys();
-    
+	~EnemyGenerator();
 private:
 	EnemyGenerator();
 

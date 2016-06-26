@@ -2,8 +2,14 @@
 #define __GAME_SCENE_H__
 
 #include "cocos2d.h"
+#include<string>
+#include "MoneyGenerator.h"
+#include "SimpleAudioEngine.h"
 #include "EnemyGenerator.h"
+#include "Definitions.h"
+#include "GameOverScene.h"
 #include "Player.h"
+using namespace CocosDenshion;
 
 class GameScene : public cocos2d::Layer
 {
@@ -19,8 +25,11 @@ public:
     
 private:
     void SetPhysicsWorld( cocos2d::PhysicsWorld *world ) { sceneWorld = world; };
-    
+	void preloadMusic();
+	void playBgm();
+
     void newEnemy( float dt );
+	void newMoney(float dt);
     
     bool onContactBegin( cocos2d::PhysicsContact &contact );
     bool onTouchBegan( cocos2d::Touch *touch, cocos2d::Event *event );
@@ -33,10 +42,13 @@ private:
 	Player *player;
     
     unsigned int score;
+	int moneyCount;
 	float scoreLock;
     
     cocos2d::Label *scoreLabel;
-    
+
+	cocos2d::Label *MoneyLabel;
+
 	Size visibleSize;
 	Vec2 origin;
 };
