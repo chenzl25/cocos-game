@@ -33,8 +33,8 @@ Sprite * EnemyGenerator::GenerateEnemy()
     
 	Sprite* m;
 	PhysicsBody* mb;
-	MoveBy* mAction;
-	int type = random()%3; // 0 云 1 山 2 鸟
+	Action* mAction;
+	int type = random()%4; // 0 云 1 山 2 鸟 3 飞机
 	if(type == 0) {
 		m = Sprite::create("cloud.png");
 		m->setPosition(visibleSize.width + m->getContentSize().width, visibleSize.height - random() % 50);
@@ -61,7 +61,7 @@ Sprite * EnemyGenerator::GenerateEnemy()
 		m = Sprite::create("mountain.png");
 		m->setPosition(visibleSize.width + m->getContentSize().width, m->getContentSize().height*(1/rand_size)/2-20);
 		m->setScale(1/rand_size);
-		mAction = MoveBy::create( MOUNT_MOVEMENT_SPEED * visibleSize.width, Point(-visibleSize.width*2 - m->getContentSize().width, 0));
+		mAction = MoveBy::create( MOUNT_MOVEMENT_SPEED * visibleSize.width, Point(-visibleSize.width - m->getContentSize().width * 2, 0));
 
 		Vec2 shape0[3];
 		shape0[0].setPoint(-550, -300);
@@ -77,18 +77,26 @@ Sprite * EnemyGenerator::GenerateEnemy()
 	} else if(type == 2) {
 		m = Sprite::create("mbird.png");
 		m->setPosition(visibleSize.width+m->getContentSize().width, random() % (int)visibleSize.height);
-		int rand_size = random() % 3 + 1;
-		//m->setScale(rand_size);
-		double rand_speed = 2 / (random() % 3 + 2);
-		mAction = MoveBy::create(rand_speed* MBIRD_MOVEMENT_SPEED * visibleSize.width, Point( -visibleSize.width * 1.5, 0 ) );
+		double rand_speed = random() % 4 + 2;
+
+		int rand_case = random() % 2;
+		ccBezierConfig bezier;
+		bezier.controlPoint_1 = Point(0, m->getPositionY());
+		if (rand_case == 0) {
+			bezier.controlPoint_2 = Point(visibleSize.width, m->getPositionY() + 200);
+			bezier.endPosition = Point(-50, m->getPositionY() + 200);
+		}
+		else {
+			bezier.controlPoint_2 = Point(visibleSize.width, m->getPositionY() - 200);
+			bezier.endPosition = Point(-50, m->getPositionY() - 200);
+		}	
+		mAction = BezierTo::create(rand_speed, bezier);
 
 		mb = PhysicsBody::createBox(m->getContentSize());
 	}
 	else if (type == 3) {
-		m = Sprite::create("mbird.png");
+		m = Sprite::create("plane.png");
 		m->setPosition(visibleSize.width + m->getContentSize().width, random() % (int)visibleSize.height);
-		int rand_size = random() % 3 + 1;
-		//m->setScale(rand_size);
 		double rand_speed = 2 / (random() % 3 + 2);
 		mAction = MoveBy::create(rand_speed* MBIRD_MOVEMENT_SPEED * visibleSize.width, Point(-visibleSize.width * 1.5, 0));
 
