@@ -46,5 +46,5 @@ void Player::Fall()
 void Player::Fly()
 {
 	speed = 0.005;
-	getPhysicsBody()->setVelocity(Vec2(0, 200));
+	getPhysicsBody()->setVelocity(Vec2(0, 300));
 }
