@@ -6,8 +6,8 @@ Scene* GameScene::createScene()
 {
     // 'scene' is an autorelease object
     auto scene = Scene::createWithPhysics( );
-    //scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL );
-	scene->getPhysicsWorld()->setGravity(Vec2(0, 0));
+    scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL );
+	scene->getPhysicsWorld()->setGravity(Vec2(0, -500.0f));
     
     // 'layer' is an autorelease object
     auto layer = GameScene::create();
@@ -198,7 +198,6 @@ void GameScene::update( float dt )
 		scoreLock -= dt*100;
 	}
 
-	player->Fall( );
 	EnemyGenerator::getInstance()->removeEnemys();
 	MoneyGenerator::getInstance()->removeMoney();
 
