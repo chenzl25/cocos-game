@@ -110,7 +110,7 @@ void GameScene::preloadMusic() {
 }
 
 void GameScene::playBgm() {
-	SimpleAudioEngine::getInstance()->playBackgroundMusic("music/bgm.mp3", true);
+	//SimpleAudioEngine::getInstance()->playBackgroundMusic("music/bgm.mp3", true);
 }
 
 
