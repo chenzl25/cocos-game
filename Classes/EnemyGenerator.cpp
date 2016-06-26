@@ -1,4 +1,3 @@
-
 #include "EnemyGenerator.h"
 #include "Definitions.h"
 
@@ -17,6 +16,15 @@ EnemyGenerator::EnemyGenerator()
 {
     visibleSize = Director::getInstance()->getVisibleSize();
     origin = Director::getInstance()->getVisibleOrigin();
+}
+
+EnemyGenerator::~EnemyGenerator() {
+	CCLOG("destrocut enemy %d", enemys.size());
+	for (int i = 0; i < enemys.size();) {
+		enemys.at(i)->removeFromParentAndCleanup(true);
+		enemys.erase(i);
+	}
+	_instance = NULL;
 }
 
 Sprite * EnemyGenerator::GenerateEnemy()
@@ -61,7 +69,7 @@ Sprite * EnemyGenerator::GenerateEnemy()
 	m->runAction(mAction);
 
 	enemys.pushBack(m);
-
+	CCLOG("enemys %d", enemys.size());
 	return m;
 
 }
@@ -76,4 +84,5 @@ void EnemyGenerator::removeEnemys() {
 			++i;
 		}
 	}
+	CCLOG("remove enemys %d", enemys.size());
 }

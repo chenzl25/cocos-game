@@ -16,8 +16,11 @@ bool Player::init() {
 	setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
 	auto flappyBody = PhysicsBody::createCircle(this->getContentSize().width / 2);
+	//flappyBody->setDynamic(false);
 	//flappyBody->setCollisionBitmask(BIRD_COLLISION_BITMASK);
 	flappyBody->setContactTestBitmask(true);
+	flappyBody->setRotationEnable(false);
+	flappyBody->setAngularVelocityLimit(0);
 
 	Sprite::setPhysicsBody(flappyBody);
 
