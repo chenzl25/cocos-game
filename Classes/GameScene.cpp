@@ -1,6 +1,4 @@
 #include "GameScene.h"
-#include "Definitions.h"
-#include "GameOverScene.h"
 
 USING_NS_CC;
 
@@ -34,6 +32,10 @@ bool GameScene::init()
     
     visibleSize = Director::getInstance()->getVisibleSize();
     origin = Director::getInstance()->getVisibleOrigin();
+	
+	//音乐
+	preloadMusic();
+	playBgm();
 
     auto backgroundSprite = Sprite::create( "Background.png" );
     backgroundSprite->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y ) );
@@ -51,11 +53,17 @@ bool GameScene::init()
     
     this->addChild( edgeNode );
     
+	//随机出现各种阻碍物
     this->schedule( schedule_selector( GameScene::newEnemy), PIPE_SPAWN_FREQUENCY * visibleSize.width );
+
+	//每隔3秒随机出现金币
+	this->schedule(schedule_selector(GameScene::newMoney), MONEY_SPAWN_FREQUENCY);
     
+	//来一只大鸟
     player = Player::create();
 	addChild(player);
     
+	//监听器注册
     auto contactListener = EventListenerPhysicsContact::create( );
     contactListener->onContactBegin = CC_CALLBACK_1( GameScene::onContactBegin, this );
     Director::getInstance( )->getEventDispatcher( )->addEventListenerWithSceneGraphPriority( contactListener, this );
@@ -69,22 +77,52 @@ bool GameScene::init()
 	keyboardListener->onKeyPressed = CC_CALLBACK_2(GameScene::onKeyPressed, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyboardListener, this);
     
+	//大鸟的持久时间
     score = 0;
 	scoreLock = 10;
     
-    __String *tempScore = __String::createWithFormat( "%i", score );
+	TTFConfig ttfConfig;
+	ttfConfig.fontFilePath = "fonts/Marker Felt.ttf";
+	ttfConfig.fontSize = 36;
     
-    scoreLabel = Label::createWithTTF( tempScore->getCString( ), "fonts/Marker Felt.ttf", visibleSize.height * SCORE_FONT_SIZE );
+    scoreLabel = Label::createWithTTF(ttfConfig, "0");
     scoreLabel->setColor( Color3B::WHITE );
     scoreLabel->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height * 0.9 + origin.y ) );
     
     this->addChild( scoreLabel, 10000 );
     
+	//大鸟捡到的钱数
+	moneyCount = 0;
+	MoneyLabel = Label::createWithTTF(ttfConfig, "0");
+	MoneyLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 + 100, visibleSize.height * 0.9 + origin.y));
+	addChild(MoneyLabel, 10000);
+
     this->scheduleUpdate( );
     
     return true;
 }
 
+void GameScene::preloadMusic() {
+	SimpleAudioEngine::getInstance()->preloadBackgroundMusic("music/bgm.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("music/Point.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("music/Wing.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("music/Hit.mp3");
+}
+
+void GameScene::playBgm() {
+	SimpleAudioEngine::getInstance()->playBackgroundMusic("music/bgm.mp3", true);
+}
+
+
+//每隔3秒随机出现金币
+void GameScene::newMoney(float dt) {
+	Vector<Node*> moneys = MoneyGenerator::getInstance()->GenerateMoney();
+	for (int i = 0; i < moneys.size(); i++) {
+		this->addChild(moneys.at(i));
+	}
+}
+
+//随机出现障碍物
 void GameScene::newEnemy( float dt )
 {
 	this->addChild(EnemyGenerator::getInstance()->GenerateEnemy());
@@ -96,22 +134,45 @@ bool GameScene::onContactBegin( cocos2d::PhysicsContact &contact )
     Node * b = contact.getShapeB()->getBody()->getNode();
     
     if (a->getTag() == ENEMY_TAG && b->getTag() == PLAYER_TAG || b->getTag() == ENEMY_TAG && a->getTag() == PLAYER_TAG)
-    {        
-        auto scene = GameOverScene::createScene( score );
+    {         //大鸟被障碍物撞死
+		this->unscheduleAllSelectors();
+		delete MoneyGenerator::getInstance();
+		delete EnemyGenerator::getInstance();
+		auto scene = GameOverScene::createScene( score );
         Director::getInstance( )->replaceScene( TransitionFade::create( TRANSITION_TIME, scene ) );
-    }
+	} else if (a->getTag() == MONEY_TAG && b->getTag() == PLAYER_TAG) { //大鸟捡到钱
+		SimpleAudioEngine::getInstance()->playEffect("music/Point.mp3");
+		auto ps = ParticleSystemQuad::create("explode.plist");
+		ps->setPosition(b->getPosition());
+		this->addChild(ps);
+		MoneyGenerator::getInstance()->obtainMoney(a);
+		moneyCount++;
+		MoneyLabel->setString(Value(moneyCount).asString());
+	} else if (b->getTag() == MONEY_TAG && a->getTag() == PLAYER_TAG) { //大鸟捡到钱
+		SimpleAudioEngine::getInstance()->playEffect("music/Point.mp3");
+		auto ps = ParticleSystemQuad::create("explode.plist");
+		ps->setPosition(b->getPosition());
+		this->addChild(ps);
+		MoneyGenerator::getInstance()->obtainMoney(b);
+		moneyCount++;
+		MoneyLabel->setString(Value(moneyCount).asString());
+	}
     
     return true;
 }
 
 bool GameScene::onTouchBegan( cocos2d::Touch *touch, cocos2d::Event *event )
 {
+	SimpleAudioEngine::getInstance()->playEffect("music/Wing.mp3");
 	player->Fly();
     return true;
 }
 
 void GameScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event) {
-	if (keyCode == EventKeyboard::KeyCode::KEY_UP_ARROW) {
+	if (keyCode == EventKeyboard::KeyCode::KEY_UP_ARROW
+		|| keyCode == EventKeyboard::KeyCode::KEY_ENTER
+		|| keyCode == EventKeyboard::KeyCode::KEY_NONE) {
+		SimpleAudioEngine::getInstance()->playEffect("music/Wing.mp3");
 		player->Fly();
 	}
 }
@@ -129,8 +190,12 @@ void GameScene::update( float dt )
 
 	player->Fall( );
 	EnemyGenerator::getInstance()->removeEnemys();
+	MoneyGenerator::getInstance()->removeMoney();
 
 	if (player->getPosition().y < 0 || player->getPosition().y > visibleSize.height) {
+		this->unscheduleAllSelectors();
+		delete MoneyGenerator::getInstance();
+		delete EnemyGenerator::getInstance();
 		auto scene = GameOverScene::createScene(score);
 		Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
 	}
