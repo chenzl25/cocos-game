@@ -30,7 +30,7 @@ void MoneyGenerator::generMoney(float x, float y) {
 	Sprite* m;
 	PhysicsBody* mb;
 	MoveBy* mAction; 
-	m = Sprite::create("Money.png");
+	m = Sprite::create("money.png");
 	m->setPosition(x, y);
 	mAction = MoveBy::create(MONEY_MOVEMENT_SPEED * visibleSize.width, Point(-visibleSize.width * 1.5, 0));
 	
@@ -38,8 +38,9 @@ void MoneyGenerator::generMoney(float x, float y) {
 
 	mb = PhysicsBody::createCircle(m->getContentSize().width / 2);
 	mb->setDynamic(false);
-	//mb->setCollisionBitmask( OBSTACLE_COLLISION_BITMASK );
-	mb->setContactTestBitmask(true);
+	mb->setCategoryBitmask(0x03);
+	mb->setCollisionBitmask(0x00);
+	mb->setContactTestBitmask(0x01);
 	mb->setRotationEnable(false);
 	mb->setAngularVelocityLimit(0);
 
