@@ -1,7 +1,7 @@
 #include "SplashScene.h"
 #include "MainMenuScene.h"
 #include "Definitions.h"
-
+//游戏开始的引导页面，停留2秒后自动跳转到主界面
 USING_NS_CC;
 
 Scene* SplashScene::createScene()
@@ -31,7 +31,8 @@ bool SplashScene::init()
     
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    
+
+	//定时器设置停留2秒后自动跳转到主界面
     this->scheduleOnce( schedule_selector( SplashScene::GoToMainMenuScene ), DISPLAY_TIME_SPLASH_SCENE );
 
     auto backgroundSprite = Sprite::create( "splash.jpg" );
@@ -52,7 +53,7 @@ bool SplashScene::init()
     
     return true;
 }
-
+//跳转到主界面
 void SplashScene::GoToMainMenuScene( float dt )
 {
     auto scene = MainMenuScene::createScene();

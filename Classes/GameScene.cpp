@@ -6,7 +6,7 @@ Scene* GameScene::createScene()
 {
     // 'scene' is an autorelease object
     auto scene = Scene::createWithPhysics( );
-    //scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL );
+    scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL );
 	scene->getPhysicsWorld()->setGravity(Vec2(0, -500.0f));
     
     // 'layer' is an autorelease object
@@ -112,6 +112,7 @@ bool GameScene::init()
     return true;
 }
 
+//预加载游戏需要的音乐
 void GameScene::preloadMusic() {
 	SimpleAudioEngine::getInstance()->preloadBackgroundMusic("music/bgm.mp3");
 	SimpleAudioEngine::getInstance()->preloadEffect("music/Point.mp3");
@@ -119,10 +120,10 @@ void GameScene::preloadMusic() {
 	SimpleAudioEngine::getInstance()->preloadEffect("music/Hit.mp3");
 }
 
+//播放背景音乐
 void GameScene::playBgm() {
-	//SimpleAudioEngine::getInstance()->playBackgroundMusic("music/bgm.mp3", true);
+	SimpleAudioEngine::getInstance()->playBackgroundMusic("music/bgm.mp3", true);
 }
-
 
 //每隔3秒随机出现金币
 void GameScene::newMoney(float dt) {
@@ -145,10 +146,11 @@ bool GameScene::onContactBegin( cocos2d::PhysicsContact &contact )
     
     if (a->getTag() == ENEMY_TAG && b->getTag() == PLAYER_TAG || b->getTag() == ENEMY_TAG && a->getTag() == PLAYER_TAG)
     {         //大鸟被障碍物撞死
+		SimpleAudioEngine::getInstance()->playEffect("music/Hit.mp3");
 		this->unscheduleAllSelectors();
 		delete MoneyGenerator::getInstance();
 		delete EnemyGenerator::getInstance();
-		auto scene = GameOverScene::createScene( score );
+		auto scene = GameOverScene::createScene( score, moneyCount );
         Director::getInstance( )->replaceScene( TransitionFade::create( TRANSITION_TIME, scene ) );
 	} else if (a->getTag() == MONEY_TAG && b->getTag() == PLAYER_TAG) { //大鸟捡到钱
 		SimpleAudioEngine::getInstance()->playEffect("music/Point.mp3");
@@ -178,6 +180,7 @@ bool GameScene::onTouchBegan( cocos2d::Touch *touch, cocos2d::Event *event )
     return true;
 }
 
+//空格，回车，上箭头，都可以控制大鸟向上飞
 void GameScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event) {
 	if (keyCode == EventKeyboard::KeyCode::KEY_UP_ARROW
 		|| keyCode == EventKeyboard::KeyCode::KEY_ENTER
@@ -187,25 +190,29 @@ void GameScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::E
 	}
 }
 
+//定时器来每帧进行控制
 void GameScene::update( float dt )
 {
+	//定时器来每帧进行计时
 	if (scoreLock <= 0) {
 		scoreLock = 10;
 		score += 1;
-		scoreLabel->setString(String::createWithFormat("%i", score)->_string);
+		scoreLabel->setString(String::createWithFormat("%i", score / 10)->_string);
 	}
 	else {
 		scoreLock -= dt*100;
 	}
-
+	CCLOG("time %d", dt);
+	//每帧判断障碍物和金币 是否移动到屏幕之外，是就移除
 	EnemyGenerator::getInstance()->removeEnemys();
 	MoneyGenerator::getInstance()->removeMoney();
 
+	//如果大鸟位置在屏幕边缘之外，也就是掉地，就要挂
 	if (player->getPosition().y < 0 || player->getPosition().y > visibleSize.height) {
 		this->unscheduleAllSelectors();
 		delete MoneyGenerator::getInstance();
 		delete EnemyGenerator::getInstance();
-		auto scene = GameOverScene::createScene(score);
+		auto scene = GameOverScene::createScene(score, moneyCount);
 		Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
 	}
 

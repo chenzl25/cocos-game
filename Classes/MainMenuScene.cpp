@@ -1,7 +1,7 @@
 #include "MainMenuScene.h"
 #include "GameScene.h"
 #include "Definitions.h"
-
+//游戏主界面，通过点击开始按钮可以进入游戏场景
 USING_NS_CC;
 
 Scene* MainMenuScene::createScene()
@@ -64,6 +64,7 @@ bool MainMenuScene::init()
     return true;
 }
 
+//点击开始按钮可以进入游戏场景
 void MainMenuScene::GoToGameScene( cocos2d::Ref *sender )
 {
     auto scene = GameScene::createScene();
