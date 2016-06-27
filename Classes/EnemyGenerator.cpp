@@ -75,7 +75,7 @@ Sprite * EnemyGenerator::GenerateEnemy()
 		mb->addShape(PhysicsShapePolygon::create(shape0, 3));
 		mb->addShape(PhysicsShapePolygon::create(shape1, 3));
 	} else if(type == 2) {
-		m = Sprite::create("mbird.png");
+		m = Sprite::create("mmbird.png");
 		m->setPosition(visibleSize.width+m->getContentSize().width, random() % (int)visibleSize.height);
 		double rand_speed = random() % 4 + 2;
 
