@@ -3,7 +3,7 @@
 
 USING_NS_CC;
 
-
+// 单例模式
 EnemyGenerator * EnemyGenerator::_instance = NULL;
 EnemyGenerator * EnemyGenerator::getInstance() {
 	if (_instance == NULL) {
@@ -27,6 +27,7 @@ EnemyGenerator::~EnemyGenerator() {
 	_instance = NULL;
 }
 
+// 生成一个敌人
 Sprite * EnemyGenerator::GenerateEnemy()
 {
     CCLOG( "SPAWN MONSTER" );
@@ -38,10 +39,8 @@ Sprite * EnemyGenerator::GenerateEnemy()
 	if(type == 0) {
 		m = Sprite::create("cloud.png");
 		m->setPosition(visibleSize.width + m->getContentSize().width, visibleSize.height - random() % 50);
-		double rand_size = (random() % 10 + 3)/3;
-		//m->setScale(rand_size);
 		double rand_speed = 2 / (random() % 2 + 2);
-		mAction = MoveBy::create(rand_speed* CLOUD_MOVEMENT_SPEED * visibleSize.width, Point( -visibleSize.width * 1.5, 0 ) );
+		mAction = MoveBy::create(rand_speed* CLOUD_MOVEMENT_SPEED * visibleSize.width, Point( -visibleSize.width - 2 * m->getContentSize().width, 0 ) );
 
 		Vec2 shape0[5];
 		shape0[0].setPoint(-70, 0);
@@ -54,6 +53,7 @@ Sprite * EnemyGenerator::GenerateEnemy()
 		shape1[1].setPoint(20, 0);
 		shape1[2].setPoint(0, -80);
 		mb = PhysicsBody::create();
+		// 为刚体添加Shape实现精确碰撞
 		mb->addShape(PhysicsShapePolygon::create(shape0, 5));
 		mb->addShape(PhysicsShapePolygon::create(shape1, 3));
 	} else if(type == 1) {
@@ -72,6 +72,7 @@ Sprite * EnemyGenerator::GenerateEnemy()
 		shape1[1].setPoint(80, 200);
 		shape1[2].setPoint(580, -300);
 		mb = PhysicsBody::create();
+		// 为刚体添加Shape实现精确碰撞
 		mb->addShape(PhysicsShapePolygon::create(shape0, 3));
 		mb->addShape(PhysicsShapePolygon::create(shape1, 3));
 	} else if(type == 2) {
@@ -80,6 +81,7 @@ Sprite * EnemyGenerator::GenerateEnemy()
 		double rand_speed = random() % 4 + 2;
 
 		int rand_case = random() % 2;
+		// 按bezier曲线运动
 		ccBezierConfig bezier;
 		bezier.controlPoint_1 = Point(0, m->getPositionY());
 		if (rand_case == 0) {
@@ -98,15 +100,16 @@ Sprite * EnemyGenerator::GenerateEnemy()
 		m = Sprite::create("plane.png");
 		m->setPosition(visibleSize.width + m->getContentSize().width, random() % (int)visibleSize.height);
 		double rand_speed = 2 / (random() % 3 + 2);
-		mAction = MoveBy::create(rand_speed* MBIRD_MOVEMENT_SPEED * visibleSize.width, Point(-visibleSize.width * 1.5, 0));
+		mAction = MoveBy::create(rand_speed* MBIRD_MOVEMENT_SPEED * visibleSize.width, Point(-visibleSize.width - 2 * m->getContentSize().width, 0));
 
-		mb = PhysicsBody::createBox(m->getContentSize());
+		mb = PhysicsBody::createBox(Size(m->getContentSize().width-10, m->getContentSize().height/2));
 	}
 
 	m->setTag(ENEMY_TAG);
 
 	mb->setDynamic(false);
-	mb->setCategoryBitmask(0x03);
+	// bitmask
+	mb->setCategoryBitmask(0x02);
 	mb->setCollisionBitmask(0x01);
 	mb->setContactTestBitmask(0x01);
 
@@ -120,6 +123,7 @@ Sprite * EnemyGenerator::GenerateEnemy()
 
 }
 
+// 检查Sprite是否超出边界 超出则移除
 void EnemyGenerator::removeEnemys() {
 	for (int i = 0; i < enemys.size();) {
 		if (enemys.at(i)->getPosition().x < -enemys.at(i)->getBoundingBox().size.width/2) {

@@ -24,9 +24,11 @@ public:
     CREATE_FUNC(GameScene);
     
 private:
-    void SetPhysicsWorld( cocos2d::PhysicsWorld *world ) { sceneWorld = world; };
+    void setPhysicsWorld( cocos2d::PhysicsWorld *world ) { sceneWorld = world; };
 	void preloadMusic();
 	void playBgm();
+
+	void ready(float dt);
 
     void newEnemy( float dt );
 	void newMoney(float dt);
@@ -39,15 +41,16 @@ private:
     
     cocos2d::PhysicsWorld *sceneWorld;
     
-	Player *player;
+	Player * player;
+	Sprite * package;
     
     unsigned int score;
 	int moneyCount;
 	float scoreLock;
     
     cocos2d::Label *scoreLabel;
-
 	cocos2d::Label *MoneyLabel;
+	cocos2d::Label *readyLabel;
 
 	Size visibleSize;
 	Vec2 origin;

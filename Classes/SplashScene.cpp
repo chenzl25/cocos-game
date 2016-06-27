@@ -36,8 +36,8 @@ bool SplashScene::init()
     this->scheduleOnce( schedule_selector( SplashScene::GoToMainMenuScene ), DISPLAY_TIME_SPLASH_SCENE );
 
     auto backgroundSprite = Sprite::create( "splash.jpg" );
-	CCSize size = CCDirector::sharedDirector()->getWinSize();
-	backgroundSprite->setPosition(ccp(size.width / 2, size.height / 2));
+	Size size = Director::getInstance()->getWinSize();
+	backgroundSprite->setPosition(Vec2(size.width / 2, size.height / 2));
 	float winw = size.width; //获取屏幕宽度
 	float winh = size.height;//获取屏幕高度
 

@@ -38,11 +38,12 @@ void MoneyGenerator::generMoney(float x, float y) {
 
 	mb = PhysicsBody::createCircle(m->getContentSize().width / 2);
 	mb->setDynamic(false);
-	mb->setCategoryBitmask(0x03);
-	mb->setCollisionBitmask(0x00);
-	mb->setContactTestBitmask(0x01);
 	mb->setRotationEnable(false);
 	mb->setAngularVelocityLimit(0);
+	// bitmask
+	mb->setCategoryBitmask(0x02);
+	mb->setCollisionBitmask(0x00);
+	mb->setContactTestBitmask(0x01);
 
 	m->setPhysicsBody(mb);
 
