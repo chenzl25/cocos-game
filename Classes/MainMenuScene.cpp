@@ -33,9 +33,9 @@ bool MainMenuScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     auto backgroundSprite = Sprite::create( "bg.jpg" );
-    backgroundSprite->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y ) );
-	CCSize size = CCDirector::sharedDirector()->getWinSize();
-	backgroundSprite->setPosition(ccp(size.width / 2, size.height / 2));
+    backgroundSprite->setPosition(Vec2( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y ) );
+	Size size = Director::getInstance()->getWinSize();
+	backgroundSprite->setPosition(Vec2(size.width / 2, size.height / 2));
 	float winw = size.width; //获取屏幕宽度
 	float winh = size.height;//获取屏幕高度
 
@@ -54,10 +54,10 @@ bool MainMenuScene::init()
     this->addChild( titleSprite );*/
     
     auto playItem = MenuItemImage::create( "Play Button.png", "Play Button Clicked.png", CC_CALLBACK_1( MainMenuScene::GoToGameScene, this ) );
-    playItem->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y ) );
+    playItem->setPosition( Vec2( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y ) );
     
     auto menu = Menu::create( playItem, NULL );
-    menu->setPosition( Point::ZERO );
+    menu->setPosition(Vec2::ZERO );
     
     this->addChild( menu );
     

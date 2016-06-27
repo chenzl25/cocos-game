@@ -6,12 +6,61 @@ Scene* GameScene::createScene()
 {
     // 'scene' is an autorelease object
     auto scene = Scene::createWithPhysics( );
-    scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL );
-	scene->getPhysicsWorld()->setGravity(Vec2(0, -500.0f));
+    //scene->getPhysicsWorld( )->setDebugDrawMask( PhysicsWorld::DEBUGDRAW_ALL);
+	scene->getPhysicsWorld()->setGravity(Vec2(0, -WORLD_GRAVITY));
     
     // 'layer' is an autorelease object
     auto layer = GameScene::create();
-    layer->SetPhysicsWorld(scene->getPhysicsWorld());
+    layer->setPhysicsWorld(scene->getPhysicsWorld());
+
+	//添加关节
+	Sprite * last_sp = NULL;
+	PhysicsBody * last_bd = NULL;
+	last_sp = Sprite::create();
+	last_sp->setTextureRect(Rect(0, 0, 10, 10));
+	last_bd = PhysicsBody::createCircle(last_sp->getContentSize().width / 2, PhysicsMaterial(1.0f, 0.0f, 0.0f));
+	last_bd->setRotationEnable(false);
+	last_bd->setMass(1);
+	last_sp->setPhysicsBody(last_bd);
+	last_sp->setPosition(layer->player->getPositionX(), layer->player->getPositionY() - 20);
+	layer->addChild(last_sp);
+
+	auto first_joint = PhysicsJointDistance::construct(layer->player->getPhysicsBody(), last_sp->getPhysicsBody(), Point::ZERO, Point::ZERO);
+	layer->sceneWorld->addJoint(first_joint);
+
+	// 循环添加关节
+	Sprite * new_sp = NULL;
+	PhysicsBody * new_bd = NULL;
+	for (int i = 0; i < 6; i++)
+	{
+		new_sp = Sprite::create();
+		new_sp->setTextureRect(Rect(0, 0, 10, 10));
+		new_bd = PhysicsBody::createCircle(new_sp->getContentSize().width / 2, PhysicsMaterial(1.0f, 0.0f, 0.0f));
+		new_bd->setRotationEnable(false);
+		new_bd->setMass(1);
+		new_sp->setPhysicsBody(new_bd);
+		new_sp->setPosition(last_sp->getPositionX(), last_sp->getPositionY() - 10);
+		layer->addChild(new_sp);
+
+		auto joint = PhysicsJointDistance::construct(last_sp->getPhysicsBody(), new_sp->getPhysicsBody(), Point::ZERO, Point::ZERO);
+		layer->sceneWorld->addJoint(joint);
+		last_sp = new_sp;
+	}
+
+	auto last_joint = PhysicsJointDistance::construct(last_sp->getPhysicsBody(), layer->package->getPhysicsBody(), Point::ZERO, Point::ZERO);
+	layer->sceneWorld->addJoint(last_joint);
+
+	// 通过PhysicsJointGroove限制小鸟运动，考虑到游戏性，否决
+	/*auto origin = Sprite::create("package.png");
+	origin->setPosition(layer->visibleSize.width/2, layer->visibleSize.height/2);
+	origin->setPhysicsBody(PhysicsBody::createCircle(10));
+	origin->getPhysicsBody()->setDynamic(false);
+	origin->getPhysicsBody()->setCollisionBitmask(0x00);
+	origin->getPhysicsBody()->setContactTestBitmask(0x00);
+	layer->addChild(origin);
+	auto joint = PhysicsJointGroove::construct(origin->getPhysicsBody(), layer->player->getPhysicsBody(), Vec2(0, -layer->visibleSize.height / 2), Vec2(0, layer->visibleSize.height / 2), Vec2::ZERO);
+	joint->setCollisionEnable(false);
+	layer->sceneWorld->addJoint(joint);*/
 
     // add layer as a child to scene
     scene->addChild(layer);
@@ -39,8 +88,8 @@ bool GameScene::init()
 
     auto backgroundSprite = Sprite::create( "bg.jpg" );
 	backgroundSprite->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-	CCSize size = CCDirector::sharedDirector()->getWinSize();
-	backgroundSprite->setPosition(ccp(size.width / 2, size.height / 2));
+	Size size = Director::getInstance()->getWinSize();
+	backgroundSprite->setPosition(Vec2(size.width / 2, size.height / 2));
 	float winw = size.width; //获取屏幕宽度
 	float winh = size.height;//获取屏幕高度
 
@@ -53,9 +102,10 @@ bool GameScene::init()
     this->addChild( backgroundSprite );
     
     auto edgeBody = PhysicsBody::createEdgeBox( visibleSize, PHYSICSBODY_MATERIAL_DEFAULT, 3 );
-    edgeBody->setCollisionBitmask( OBSTACLE_COLLISION_BITMASK );
+    edgeBody->setCollisionBitmask(ENEMY_SPAWN_FREQUENCY);
     edgeBody->setContactTestBitmask( true );
     
+	// 屏幕边界
     auto edgeNode = Node::create();
     edgeNode->setPosition( Point( visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y ) );
     
@@ -63,30 +113,35 @@ bool GameScene::init()
     
     this->addChild( edgeNode );
     
-	//随机出现各种阻碍物
-    this->schedule( schedule_selector( GameScene::newEnemy), PIPE_SPAWN_FREQUENCY * visibleSize.width );
+	// 准备
+	scheduleOnce(schedule_selector(GameScene::ready), 5.0f);
+	readyLabel = Label::createWithTTF("Ready", "fonts/Marker Felt.ttf", 50);
+	readyLabel->setPosition(-100, visibleSize.height - 100);
+	addChild(readyLabel);
+	readyLabel->runAction(MoveTo::create(1.0f, Vec2(visibleSize.width / 2, visibleSize.height - 100)));
 
-	//每隔3秒随机出现金币
-	this->schedule(schedule_selector(GameScene::newMoney), MONEY_SPAWN_FREQUENCY);
-    
 	//来一只大鸟
     player = Player::create();
 	addChild(player);
-    
-	//监听器注册
-    auto contactListener = EventListenerPhysicsContact::create( );
-    contactListener->onContactBegin = CC_CALLBACK_1( GameScene::onContactBegin, this );
-    Director::getInstance( )->getEventDispatcher( )->addEventListenerWithSceneGraphPriority( contactListener, this );
-    
-    auto touchListener = EventListenerTouchOneByOne::create( );
-    touchListener->setSwallowTouches( true );
-    touchListener->onTouchBegan = CC_CALLBACK_2( GameScene::onTouchBegan, this );
-    Director::getInstance( )->getEventDispatcher( )->addEventListenerWithSceneGraphPriority( touchListener, this );
 
-	auto keyboardListener = EventListenerKeyboard::create();
-	keyboardListener->onKeyPressed = CC_CALLBACK_2(GameScene::onKeyPressed, this);
-	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyboardListener, this);
-    
+	//大鸟要快递的包裹
+	package = Sprite::create("package.png");
+	package->setPosition(player->getPosition()-Vec2(15, 112));
+	package->setPhysicsBody(PhysicsBody::createBox(package->getContentSize()));
+	package->getPhysicsBody()->setMass(PACKAGE_MASS);
+	package->getPhysicsBody()->setRotationEnable(false);
+	package->setScale(0.5);
+	// bitmask
+	package->getPhysicsBody()->setCategoryBitmask(0x05);
+	package->getPhysicsBody()->setCollisionBitmask(0x06);
+	package->getPhysicsBody()->setContactTestBitmask(0x00);
+
+	// 初始化受力
+	player->getPhysicsBody()->applyForce(Vec2(INTERACTION_FORCE, (PLAYER_MASS + PACKAGE_MASS)*WORLD_GRAVITY + 5000));
+	package->getPhysicsBody()->applyForce(Vec2(-INTERACTION_FORCE, 0));
+
+	addChild(package);
+
 	//大鸟的持久时间
     score = 0;
 	scoreLock = 10;
@@ -123,6 +178,35 @@ void GameScene::preloadMusic() {
 //播放背景音乐
 void GameScene::playBgm() {
 	SimpleAudioEngine::getInstance()->playBackgroundMusic("music/bgm.mp3", true);
+}
+
+// 准备阶段
+void GameScene::ready(float dt) {
+	player->getPhysicsBody()->applyForce(Vec2(0, -(PLAYER_MASS + PACKAGE_MASS)*WORLD_GRAVITY + 5000));
+	readyLabel->setString(Value("Go").asString());
+	readyLabel->setPosition(Vec2(visibleSize.width / 2, readyLabel->getPositionY()+50));
+	readyLabel->runAction(Sequence::create(MoveBy::create(0.2f, Vec2(0, - 50)), FadeOut::create(2.0f), NULL));
+
+	//监听器注册
+	auto contactListener = EventListenerPhysicsContact::create();
+	contactListener->onContactBegin = CC_CALLBACK_1(GameScene::onContactBegin, this);
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(contactListener, this);
+
+	auto touchListener = EventListenerTouchOneByOne::create();
+	touchListener->setSwallowTouches(true);
+	touchListener->onTouchBegan = CC_CALLBACK_2(GameScene::onTouchBegan, this);
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
+
+	auto keyboardListener = EventListenerKeyboard::create();
+	keyboardListener->onKeyPressed = CC_CALLBACK_2(GameScene::onKeyPressed, this);
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyboardListener, this);
+
+	//随机出现各种阻碍物
+	this->schedule(schedule_selector(GameScene::newEnemy), ENEMY_SPAWN_FREQUENCY * visibleSize.width);
+
+	//每隔3秒随机出现金币
+	this->schedule(schedule_selector(GameScene::newMoney), MONEY_SPAWN_FREQUENCY);
+
 }
 
 //每隔3秒随机出现金币
@@ -193,11 +277,11 @@ void GameScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::E
 //定时器来每帧进行控制
 void GameScene::update( float dt )
 {
-	//定时器来每帧进行计时
+	//定时器来每帧进行计时 考虑dt保证以时间作为度量而非帧数
 	if (scoreLock <= 0) {
 		scoreLock = 10;
 		score += 1;
-		scoreLabel->setString(String::createWithFormat("%i", score / 10)->_string);
+		scoreLabel->setString(String::createWithFormat("%i", score)->_string);
 	}
 	else {
 		scoreLock -= dt*100;
@@ -207,8 +291,21 @@ void GameScene::update( float dt )
 	EnemyGenerator::getInstance()->removeEnemys();
 	MoneyGenerator::getInstance()->removeMoney();
 
+	// 自动修正鸟儿位置
+	if (player->getPositionX() < visibleSize.width / 2 - 10) {
+		player->setPositionX(player->getPositionX()+0.5);
+	}
+	else if (player->getPositionX() > visibleSize.width / 2 + 10) {
+		player->setPositionX(player->getPositionX() - 0.5);
+	}
+
+	// 快递包裹位置修复
+	if (package->getPositionY() > player->getPositionY()) {
+		package->setPositionX(package->getPositionX() - 1);
+	}
+
 	//如果大鸟位置在屏幕边缘之外，也就是掉地，就要挂
-	if (player->getPosition().y < 0 || player->getPosition().y > visibleSize.height) {
+	if (player->getPosition().y < -10 || player->getPosition().y > visibleSize.height + 50) {
 		this->unscheduleAllSelectors();
 		delete MoneyGenerator::getInstance();
 		delete EnemyGenerator::getInstance();
