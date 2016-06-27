@@ -129,7 +129,6 @@ Vector<Node*> MoneyGenerator::GenerateMoney() {
 			}
 		}
 	}
-	CCLOG("Money %d", Money.size());
 	return Money;
 }
 
@@ -149,5 +148,4 @@ void MoneyGenerator::removeMoney() {
 			++i;
 		}
 	}
-	CCLOG("after remove %d", Money.size());
 }
